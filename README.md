@@ -19,10 +19,10 @@ To run the system:
 3. Run the following command:
 
 ```sh
-./run.sh
+./LIM-49
 ```
 
-The [`run.sh`](run.sh) script will automatically check dependencies and install nano editor if needed.
+The [`LIM-49`](LIM-49) script will automatically check dependencies and install nano editor if needed.
 
 ## Commands
 
@@ -72,10 +72,10 @@ end
 ## System Requirements
 
 - LUA interpreter
-- nano text editor (automatically installed by run.sh)
+- nano text editor (automatically installed by LIM-49)
 - Linux/Unix-based system (Debian, Arch, or Fedora-based distributions supported)
 
 ## Version Information
 
-- LIM-49 version: 0.1
-- LIM-OS version: 1.1
+- LIM-49 version: 0.2
+- LIM-OS version: 1.2

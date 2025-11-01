@@ -53,6 +53,11 @@ local function run_game(filename)
                 print(file)
             end
             p:close()
+        end,
+        require = function (name)
+            mod = require(name)
+            mod.init(ram)
+            return mod
         end
     }
 
@@ -74,5 +79,5 @@ local function run_game(filename)
     end
 end
 
-print("Starting shell...")
-run_game("sys/shell.lua")
+print("Starting os...")
+run_game("sys/os.lua")
