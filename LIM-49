@@ -1,0 +1,37 @@
+#!/bin/sh
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+else
+    echo "Error: /etc/os-release not found!"
+    exit 1
+fi
+
+if command -v nano >/dev/null 2>&1; then
+    lua sys/core.lua
+    exit 0
+fi
+
+echo "nano not found, installing..."
+
+if echo "$ID_LIKE" | grep -q "debian"; then
+    echo "Detected Debian/Ubuntu-based system ($ID)"
+    sudo apt update && sudo apt install -y nano
+elif echo "$ID_LIKE" | grep -q "arch"; then
+    echo "Detected Arch-based system ($ID)"
+    sudo pacman -Sy --noconfirm nano
+elif echo "$ID_LIKE" | grep -q "fedora" || [ "$ID" = "fedora" ]; then
+    echo "Detected Fedora-based system ($ID)"
+    sudo dnf install -y nano
+else
+    echo "Unknown distribution: $ID ($ID_LIKE)"
+    echo "Please install nano manually."
+    exit 1
+fi
+
+if command -v nano >/dev/null 2>&1; then
+    echo "nano installed successfully"
+    lua sys/core.lua
+else
+    echo "Failed to install nano. Please install it manually."
+fi
