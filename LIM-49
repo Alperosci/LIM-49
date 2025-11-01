@@ -7,31 +7,61 @@ else
     exit 1
 fi
 
-if command -v nano >/dev/null 2>&1; then
-    lua sys/core.lua
-    exit 0
+install_pkg() {
+    pkg="$1"
+    if echo "$ID_LIKE" | grep -q "debian"; then
+        echo "Detected Debian/Ubuntu-based system ($ID)"
+        sudo apt-get update
+        sudo apt-get install -y $pkg
+    elif echo "$ID_LIKE" | grep -q "arch"; then
+        echo "Detected Arch-based system ($ID)"
+        sudo pacman -Sy --noconfirm $pkg
+    elif echo "$ID_LIKE" | grep -q "fedora" || [ "$ID" = "fedora" ]; then
+        echo "Detected Fedora-based system ($ID)"
+        sudo dnf install -y $pkg
+    else
+        echo "Unknown distribution: $ID ($ID_LIKE)"
+        echo "Please install $pkg manually."
+        return 1
+    fi
+    return 0
+}
+
+if ! command -v lua >/dev/null 2>&1; then
+    echo "lua not found, attempting to install..."
+    if echo "$ID_LIKE" | grep -q "debian"; then
+        sudo apt-get update
+        if sudo apt-get install -y lua5.4 >/dev/null 2>&1; then
+            echo "Installed lua"
+        else
+            sudo apt-get install -y lua || true
+        fi
+    else
+        if ! install_pkg lua; then
+            echo "Failed to install lua automatically. Please install Lua (5.4+) and re-run."
+            exit 1
+        fi
+    fi
+
+    if ! command -v lua >/dev/null 2>&1; then
+        echo "Lua installation failed or not available in PATH."
+        exit 1
+    fi
 fi
 
-echo "nano not found, installing..."
+# Ensure nano is installed
+if ! command -v nano >/dev/null 2>&1; then
+    echo "nano not found, attempting to install..."
+    if ! install_pkg nano; then
+        echo "Failed to install nano automatically. Please install nano and re-run."
+        exit 1
+    fi
 
-if echo "$ID_LIKE" | grep -q "debian"; then
-    echo "Detected Debian/Ubuntu-based system ($ID)"
-    sudo apt update && sudo apt install -y nano
-elif echo "$ID_LIKE" | grep -q "arch"; then
-    echo "Detected Arch-based system ($ID)"
-    sudo pacman -Sy --noconfirm nano
-elif echo "$ID_LIKE" | grep -q "fedora" || [ "$ID" = "fedora" ]; then
-    echo "Detected Fedora-based system ($ID)"
-    sudo dnf install -y nano
-else
-    echo "Unknown distribution: $ID ($ID_LIKE)"
-    echo "Please install nano manually."
-    exit 1
+    if ! command -v nano >/dev/null 2>&1; then
+        echo "Failed to install nano. Please install it manually."
+        exit 1
+    fi
 fi
 
-if command -v nano >/dev/null 2>&1; then
-    echo "nano installed successfully"
-    lua sys/core.lua
-else
-    echo "Failed to install nano. Please install it manually."
-fi
+echo "Requirements satisfied. Starting LIM-49..."
+lua sys/core.lua
